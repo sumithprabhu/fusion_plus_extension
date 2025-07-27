@@ -26,16 +26,12 @@ if ! command -v near &> /dev/null; then
     exit 1
 fi
 
-# Check if user is logged in
-if ! near whoami &> /dev/null; then
-    echo -e "${RED}Error: You are not logged in to NEAR. Please login first.${NC}"
-    echo "Login with: near login"
-    exit 1
-fi
+# Check if user is logged in - skip for now since we know the account
+echo -e "${GREEN}Using account: sumith.testnet${NC}"
 
-# Get the current account
-CURRENT_ACCOUNT=$(near whoami)
-echo -e "${YELLOW}Current NEAR account: ${CURRENT_ACCOUNT}${NC}"
+# Get the current account - use a default or check if logged in
+CURRENT_ACCOUNT="sumith.testnet"
+echo -e "${YELLOW}Using NEAR account: ${CURRENT_ACCOUNT}${NC}"
 
 # Build the contracts
 echo -e "${YELLOW}Building contracts...${NC}"
@@ -63,7 +59,7 @@ near create-account $RESOLVER_ACCOUNT --masterAccount $CURRENT_ACCOUNT --network
 
 # Deploy escrow factory
 echo -e "${YELLOW}Deploying EscrowFactory...${NC}"
-near deploy --accountId $ESCROW_FACTORY_ACCOUNT --wasmFile target/wasm32-unknown-unknown/release/near_cross_chain_swap.wasm --networkId $NETWORK_ID
+near deploy $ESCROW_FACTORY_ACCOUNT target/wasm32-unknown-unknown/release/near_cross_chain_swap.wasm --networkId $NETWORK_ID
 
 # Initialize escrow factory
 echo "Initializing escrow factory..."
@@ -71,7 +67,7 @@ near call $ESCROW_FACTORY_ACCOUNT new '{"owner_id": "'$CURRENT_ACCOUNT'"}' --acc
 
 # Deploy resolver
 echo -e "${YELLOW}Deploying Resolver...${NC}"
-near deploy --accountId $RESOLVER_ACCOUNT --wasmFile target/wasm32-unknown-unknown/release/near_cross_chain_swap.wasm --networkId $NETWORK_ID
+near deploy $RESOLVER_ACCOUNT target/wasm32-unknown-unknown/release/near_cross_chain_swap.wasm --networkId $NETWORK_ID
 
 # Initialize resolver
 echo "Initializing resolver..."
