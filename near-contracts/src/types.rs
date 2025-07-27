@@ -1,6 +1,5 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{AccountId, Timestamp};
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 
 pub type Balance = u128;
 

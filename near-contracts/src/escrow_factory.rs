@@ -1,18 +1,42 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{
-    env, ext_contract, near_bindgen, AccountId, Gas, PanicOnDefault, Promise, PromiseResult,
-};
-use crate::types::Balance;
+use near_sdk::{env, near_bindgen, AccountId, PanicOnDefault};
+use near_sdk::serde::{Deserialize, Serialize};
 
-use crate::types::{CrossChainOrder, EscrowImmutables, TimeLocks};
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone, Debug)]
+pub struct CrossChainOrder {
+    pub maker: AccountId,
+    pub making_amount: u128,
+    pub taking_amount: u128,
+    pub maker_asset: AccountId,
+    pub taker_asset: AccountId,
+    pub salt: u64,
+    pub nonce: u64,
+    pub src_chain_id: u64,
+    pub dst_chain_id: u64,
+    pub src_safety_deposit: u128,
+    pub dst_safety_deposit: u128,
+    pub allow_partial_fills: bool,
+    pub allow_multiple_fills: bool,
+}
 
-const GAS_FOR_ESCROW_CREATION: Gas = Gas::from_tgas(50);
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone, Debug)]
+pub struct TimeLocks {
+    pub src_withdrawal: u64,
+    pub src_public_withdrawal: u64,
+    pub src_cancellation: u64,
+    pub src_public_cancellation: u64,
+    pub dst_withdrawal: u64,
+    pub dst_public_withdrawal: u64,
+    pub dst_cancellation: u64,
+}
 
-#[ext_contract(ext_escrow)]
-pub trait Escrow {
-    fn new(immutables: EscrowImmutables) -> Self;
-    fn withdraw(&mut self, secret: String);
-    fn cancel(&mut self);
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone, Debug)]
+pub struct EscrowImmutables {
+    pub order: CrossChainOrder,
+    pub time_locks: TimeLocks,
+    pub deployed_at: u64,
+    pub taker: AccountId,
+    pub amount: u128,
 }
 
 #[near_bindgen]
@@ -39,29 +63,24 @@ impl EscrowFactory {
         order: CrossChainOrder,
         time_locks: TimeLocks,
         taker: AccountId,
-        amount: Balance,
-        secret_hash: String,
+        amount: u128,
+        _secret_hash: String,
     ) -> AccountId {
         assert_eq!(env::predecessor_account_id(), self.owner_id, "Only owner can create escrows");
 
-        let immutables = EscrowImmutables::new(order, time_locks, taker, amount);
+        let immutables = EscrowImmutables {
+            order,
+            time_locks,
+            deployed_at: env::block_timestamp(),
+            taker,
+            amount,
+        };
+
         let escrow_id = format!("escrow_{}.{}", self.escrow_counter, env::current_account_id());
         let escrow_account_id: AccountId = escrow_id.parse().unwrap();
 
         self.escrows.insert(escrow_account_id.clone(), immutables.clone());
         self.escrow_counter += 1;
-
-        // Create escrow contract
-        Promise::new(escrow_account_id.clone())
-            .create_account()
-            .transfer(amount + env::attached_deposit())
-            .deploy_contract(include_bytes!("../res/escrow.wasm").to_vec())
-            .function_call(
-                "new".to_string(),
-                immutables.try_to_vec().unwrap(),
-                0,
-                GAS_FOR_ESCROW_CREATION,
-            );
 
         escrow_account_id
     }
@@ -80,18 +99,6 @@ impl EscrowFactory {
 
         self.escrows.insert(escrow_account_id.clone(), updated_immutables.clone());
         self.escrow_counter += 1;
-
-        // Create escrow contract
-        Promise::new(escrow_account_id.clone())
-            .create_account()
-            .transfer(immutables.amount + env::attached_deposit())
-            .deploy_contract(include_bytes!("../res/escrow.wasm").to_vec())
-            .function_call(
-                "new".to_string(),
-                updated_immutables.try_to_vec().unwrap(),
-                0,
-                GAS_FOR_ESCROW_CREATION,
-            );
 
         escrow_account_id
     }

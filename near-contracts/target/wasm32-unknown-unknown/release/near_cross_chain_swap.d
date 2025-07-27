@@ -1,0 +1,1 @@
+/Users/sumith/Personal/Projects/cross-chain-resolver-example/near-contracts/target/wasm32-unknown-unknown/release/near_cross_chain_swap.wasm: /Users/sumith/Personal/Projects/cross-chain-resolver-example/near-contracts/src/escrow_factory.rs /Users/sumith/Personal/Projects/cross-chain-resolver-example/near-contracts/src/lib.rs
