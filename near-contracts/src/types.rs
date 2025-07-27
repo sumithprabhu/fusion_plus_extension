@@ -1,7 +1,10 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{AccountId, Balance, Timestamp};
+use near_sdk::{AccountId, Timestamp};
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 
-#[derive(BorshDeserialize, BorshSerialize, Clone, Debug)]
+pub type Balance = u128;
+
+#[derive(BorshDeserialize, BorshSerialize, serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct CrossChainOrder {
     pub maker: AccountId,
     pub making_amount: Balance,
@@ -18,7 +21,7 @@ pub struct CrossChainOrder {
     pub allow_multiple_fills: bool,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Clone, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct TimeLocks {
     pub src_withdrawal: u64,
     pub src_public_withdrawal: u64,
@@ -29,7 +32,7 @@ pub struct TimeLocks {
     pub dst_cancellation: u64,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Clone, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct EscrowImmutables {
     pub order: CrossChainOrder,
     pub time_locks: TimeLocks,
@@ -38,7 +41,7 @@ pub struct EscrowImmutables {
     pub amount: Balance,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Clone, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct EscrowState {
     pub immutables: EscrowImmutables,
     pub is_withdrawn: bool,

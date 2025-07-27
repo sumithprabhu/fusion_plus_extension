@@ -1,5 +1,6 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{env, near_bindgen, AccountId, Balance, Gas, PanicOnDefault, Promise};
+use near_sdk::{env, near_bindgen, AccountId, Gas, PanicOnDefault, Promise};
+use crate::types::Balance;
 
 mod escrow_factory;
 mod resolver;
@@ -24,7 +25,7 @@ impl CrossChainSwap {
     pub fn new(owner_id: AccountId) -> Self {
         Self {
             escrow_factory: EscrowFactory::new(owner_id.clone()),
-            resolver: Resolver::new(owner_id),
+            resolver: Resolver::new(owner_id, owner_id.clone()),
         }
     }
 } 

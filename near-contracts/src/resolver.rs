@@ -1,11 +1,12 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{
-    env, ext_contract, near_bindgen, AccountId, Balance, Gas, PanicOnDefault, Promise, PromiseResult,
+    env, ext_contract, near_bindgen, AccountId, Gas, PanicOnDefault, Promise, PromiseResult,
 };
+use crate::types::Balance;
 
 use crate::types::{CrossChainOrder, EscrowImmutables, TimeLocks};
 
-const GAS_FOR_ESCROW_CALL: Gas = Gas(20_000_000_000_000);
+const GAS_FOR_ESCROW_CALL: Gas = Gas::from_tgas(20);
 
 #[ext_contract(ext_escrow_factory)]
 pub trait EscrowFactory {

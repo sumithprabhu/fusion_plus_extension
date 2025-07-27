@@ -1,11 +1,12 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{
-    env, ext_contract, near_bindgen, AccountId, Balance, Gas, PanicOnDefault, Promise, PromiseResult,
+    env, ext_contract, near_bindgen, AccountId, Gas, PanicOnDefault, Promise, PromiseResult,
 };
+use crate::types::Balance;
 
 use crate::types::{EscrowImmutables, EscrowState};
 
-const GAS_FOR_FT_TRANSFER: Gas = Gas(10_000_000_000_000);
+const GAS_FOR_FT_TRANSFER: Gas = Gas::from_tgas(10);
 
 #[ext_contract(ext_ft)]
 pub trait FungibleToken {
